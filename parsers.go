@@ -1,3 +1,6 @@
+// Package msix_parsers importing concrete implementations of github.com/doctor-fate/mskix.Parser
+// and create aliases for Id's
+// End users must import this package instead of concrete implementations
 package mskix_parsers
 
 import (

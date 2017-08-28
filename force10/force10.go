@@ -11,6 +11,8 @@ import (
 	"github.com/doctor-fate/mskix/device"
 )
 
+// Id is the name of the current parser. Must be unique
+// See github.com/doctor-fate/mskix-parsers for all available parsers
 const Id device.ID = "Force10"
 
 type parser struct {
@@ -30,6 +32,9 @@ func newParser() mskix.Parser {
 	}
 }
 
+// Parse implements github.com/doctor-fate/mskix.Parser
+// It reads input line by line and parses each line using parseRecord function
+// Returns device.Data and error, if any. Error always nil, except header doesn't match
 func (p *parser) Parse(input []byte) (device.Data, error) {
 	var data = device.Data{
 		Id: Id,
@@ -47,6 +52,7 @@ func (p *parser) Parse(input []byte) (device.Data, error) {
 	return data, err
 }
 
+// parseRecord parses one line of input using regex and returns device.Record and error, if no match was found
 func (p *parser) parseRecord(input []byte) (device.Record, error) {
 	matches := p.re.FindSubmatch(input)
 	if matches == nil {
