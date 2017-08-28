@@ -1,8 +1,9 @@
 package force10
 
 import (
-	"github.com/doctor-fate/mskix/device"
 	"testing"
+
+	"github.com/doctor-fate/mskix/device"
 )
 
 func TestParser_Parse_Valid(t *testing.T) {
