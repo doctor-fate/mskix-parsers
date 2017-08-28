@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io"
 	"regexp"
 
 	"github.com/doctor-fate/mskix"
+	"github.com/doctor-fate/mskix-parsers/utility"
 	"github.com/doctor-fate/mskix/device"
 )
 
@@ -42,23 +42,9 @@ func (p *parser) Parse(input []byte) (device.Data, error) {
 	if !p.header.Match(header) {
 		return data, fmt.Errorf("Parse: header doesn't match: id=%s, header=%s", Id, header)
 	}
-	for {
-		line, err := r.ReadBytes('\n')
-		if err != nil {
-			if err == io.EOF {
-				if len(line) > 1 {
-					if record, err := p.parseRecord(line); err == nil {
-						data.Records = append(data.Records, record)
-					}
-				}
-				return data, nil
-			}
-			return data, err
-		}
-		if record, err := p.parseRecord(line); err == nil {
-			data.Records = append(data.Records, record)
-		}
-	}
+
+	data.Records, err = utility.ReadInput(r, p.parseRecord)
+	return data, err
 }
 
 func (p *parser) parseRecord(input []byte) (device.Record, error) {
@@ -68,7 +54,13 @@ func (p *parser) parseRecord(input []byte) (device.Record, error) {
 	}
 	return device.Record{
 		Port:        string(matches[1]),
-		Description: string(matches[2]),
-		VLAN:        string(matches[3]),
+		Description: p.sanitize(matches[2]),
+		VLAN:        p.sanitize(matches[3]),
 	}, nil
+}
+
+func (p *parser) sanitize(input []byte) device.EmptyString {
+	s := string(input)
+	v := s != "" && s != "--"
+	return device.NewEmptyString(s, v)
 }
